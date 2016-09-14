@@ -33,9 +33,14 @@ namespace BracketsCheck
             iniFilePath = Path.Combine(iniFilePath, PluginName + ".ini");
             someSetting = (Win32.GetPrivateProfileInt("SomeSection", "SomeKey", 0, iniFilePath) != 0);
 
+            // file aperto
             PluginBase.SetCommand(0, "Check Brackets", checkBrackets, new ShortcutKey(false, false, false, Keys.None));
 
-            idMyDlg = 1;
+            //TODO: solo la parte del file selezionata
+
+            //TODO: tutti i file aperti
+
+            idMyDlg = 0;
         }
         internal static void SetToolBarIcon()
         {
@@ -61,14 +66,13 @@ namespace BracketsCheck
 
             // leggo il testo un carattere alla volta
 
-
             // se è una parentesi aperta faccio la push nello stack
 
             // se è una parentesi chiusa faccio la pop e confronto
 
             // se sono dello stesso tipo ok, altrimenti errore
 
-            MessageBox.Show("Brackets balanced!");
+            MessageBox.Show("All brackets in your file are balanced", "Brackets balanced!");
         }
 
         internal static void myDockableDialog()
