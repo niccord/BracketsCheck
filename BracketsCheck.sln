@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.23107.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BracketsCheck", "BracketsCheck\BracketsCheck.csproj", "{E56F6E12-089C-40ED-BCFD-923E5FA121A1}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		ANSI Debug|x86 = ANSI Debug|x86
+		ANSI Release|x86 = ANSI Release|x86
+		Unicode Debug|x86 = Unicode Debug|x86
+		Unicode Realeas|x86 = Unicode Realeas|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E56F6E12-089C-40ED-BCFD-923E5FA121A1}.ANSI Debug|x86.ActiveCfg = Debug|Any CPU
+		{E56F6E12-089C-40ED-BCFD-923E5FA121A1}.ANSI Debug|x86.Build.0 = Debug|Any CPU
+		{E56F6E12-089C-40ED-BCFD-923E5FA121A1}.ANSI Release|x86.ActiveCfg = Release|Any CPU
+		{E56F6E12-089C-40ED-BCFD-923E5FA121A1}.ANSI Release|x86.Build.0 = Release|Any CPU
+		{E56F6E12-089C-40ED-BCFD-923E5FA121A1}.Unicode Debug|x86.ActiveCfg = Debug|Any CPU
+		{E56F6E12-089C-40ED-BCFD-923E5FA121A1}.Unicode Debug|x86.Build.0 = Debug|Any CPU
+		{E56F6E12-089C-40ED-BCFD-923E5FA121A1}.Unicode Realeas|x86.ActiveCfg = Release|Any CPU
+		{E56F6E12-089C-40ED-BCFD-923E5FA121A1}.Unicode Realeas|x86.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

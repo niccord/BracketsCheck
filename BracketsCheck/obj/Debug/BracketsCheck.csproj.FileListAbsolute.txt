@@ -1,0 +1,7 @@
+d:\documenti\visual studio 2015\Projects\BracketsCheck\BracketsCheck\bin\Debug\BracketsCheck.dll
+d:\documenti\visual studio 2015\Projects\BracketsCheck\BracketsCheck\bin\Debug\BracketsCheck.pdb
+d:\documenti\visual studio 2015\Projects\BracketsCheck\BracketsCheck\obj\Debug\BracketsCheck.frmMyDlg.resources
+d:\documenti\visual studio 2015\Projects\BracketsCheck\BracketsCheck\obj\Debug\BracketsCheck.Properties.Resources.resources
+d:\documenti\visual studio 2015\Projects\BracketsCheck\BracketsCheck\obj\Debug\BracketsCheck.csproj.GenerateResource.Cache
+d:\documenti\visual studio 2015\Projects\BracketsCheck\BracketsCheck\obj\Debug\BracketsCheck.dll
+d:\documenti\visual studio 2015\Projects\BracketsCheck\BracketsCheck\obj\Debug\BracketsCheck.pdb
