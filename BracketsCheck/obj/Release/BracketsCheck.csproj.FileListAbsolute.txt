@@ -1,7 +1,0 @@
-D:\Documenti\Visual Studio 2015\Projects\BracketsCheck\BracketsCheck\obj\Release\BracketsCheck.frmMyDlg.resources
-D:\Documenti\Visual Studio 2015\Projects\BracketsCheck\BracketsCheck\obj\Release\BracketsCheck.Properties.Resources.resources
-D:\Documenti\Visual Studio 2015\Projects\BracketsCheck\BracketsCheck\obj\Release\BracketsCheck.csproj.GenerateResource.Cache
-D:\Documenti\Visual Studio 2015\Projects\BracketsCheck\BracketsCheck\bin\Release\BracketsCheck.dll
-D:\Documenti\Visual Studio 2015\Projects\BracketsCheck\BracketsCheck\bin\Release\BracketsCheck.pdb
-D:\Documenti\Visual Studio 2015\Projects\BracketsCheck\BracketsCheck\obj\Release\BracketsCheck.dll
-D:\Documenti\Visual Studio 2015\Projects\BracketsCheck\BracketsCheck\obj\Release\BracketsCheck.pdb
