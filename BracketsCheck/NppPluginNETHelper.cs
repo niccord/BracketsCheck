@@ -4,7 +4,7 @@ using System.Windows.Forms;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
-namespace NppPluginNET
+namespace BracketsCheck
 {
     #region " Notepad++ "
     [StructLayout(LayoutKind.Sequential)]

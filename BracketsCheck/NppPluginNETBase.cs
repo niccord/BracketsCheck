@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace NppPluginNET
+namespace BracketsCheck
 {
     class PluginBase
     {

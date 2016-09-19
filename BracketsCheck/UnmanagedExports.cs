@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using NppPluginNET;
 using NppPlugin.DllExport;
 
 namespace BracketsCheck
@@ -48,13 +47,13 @@ namespace BracketsCheck
             SCNotification nc = (SCNotification)Marshal.PtrToStructure(notifyCode, typeof(SCNotification));
             if (nc.nmhdr.code == (uint)NppMsg.NPPN_TBMODIFICATION)
             {
-                PluginBase._funcItems.RefreshItems();
-                Main.SetToolBarIcon();
+                //PluginBase._funcItems.RefreshItems();
+                //Main.SetToolBarIcon();
             }
             else if (nc.nmhdr.code == (uint)NppMsg.NPPN_SHUTDOWN)
             {
-                Main.PluginCleanUp();
-                Marshal.FreeHGlobal(_ptrPluginName);
+                //Main.PluginCleanUp();
+                //Marshal.FreeHGlobal(_ptrPluginName);
             }
         }
     }

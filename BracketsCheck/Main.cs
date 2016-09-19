@@ -5,25 +5,36 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
-using NppPluginNET;
 using System.Collections;
 
 namespace BracketsCheck
 {
     class Main
     {
-        #region " Fields "
+        #region Fields
         internal const string PluginName = "BracketsCheck";
         static string iniFilePath = null;
         static bool someSetting = false;
-        static frmMyDlg frmMyDlg = null;
+        //static frmMyDlg frmMyDlg = null;
         static int idMyDlg = -1;
         static Bitmap tbBmp = Properties.Resources.star;
         static Bitmap tbBmp_tbTab = Properties.Resources.star_bmp;
-        static Icon tbIcon = null;
+        //static Icon tbIcon = null;
         #endregion
 
-        #region " StartUp/CleanUp "
+        #region 
+
+        private struct BCChar
+        {
+            public char charvalue;
+            public int rownumber;
+            public int charnumber;
+        }
+
+        #endregion
+
+        #region StartUp/CleanUp
+
         internal static void CommandMenuInit()
         {
             StringBuilder sbIniFilePath = new StringBuilder(Win32.MAX_PATH);
@@ -33,47 +44,183 @@ namespace BracketsCheck
             iniFilePath = Path.Combine(iniFilePath, PluginName + ".ini");
             someSetting = (Win32.GetPrivateProfileInt("SomeSection", "SomeKey", 0, iniFilePath) != 0);
 
-            // file aperto
-            PluginBase.SetCommand(0, "Check Brackets", checkBrackets, new ShortcutKey(false, false, false, Keys.None));
-
-            //TODO: solo la parte del file selezionata
-
             //TODO: tutti i file aperti
+
+            // file aperto
+            PluginBase.SetCommand(0, "Check Brackets: All text", checkBracketsAll, new ShortcutKey(false, false, false, Keys.None));
+            PluginBase.SetCommand(1, "Check Brackets: Selected text", checkBracketsSelected, new ShortcutKey(false, false, false, Keys.None));
 
             idMyDlg = 0;
         }
-        internal static void SetToolBarIcon()
+
+        internal static string GetAllText()
         {
-            toolbarIcons tbIcons = new toolbarIcons();
-            tbIcons.hToolbarBmp = tbBmp.GetHbitmap();
-            IntPtr pTbIcons = Marshal.AllocHGlobal(Marshal.SizeOf(tbIcons));
-            Marshal.StructureToPtr(tbIcons, pTbIcons, false);
-            Win32.SendMessage(PluginBase.nppData._nppHandle, NppMsg.NPPM_ADDTOOLBARICON, PluginBase._funcItems.Items[idMyDlg]._cmdID, pTbIcons);
-            Marshal.FreeHGlobal(pTbIcons);
+            int length = (int)Win32.SendMessage(PluginBase.GetCurrentScintilla(), SciMsg.SCI_GETLENGTH, 0, 0);
+            IntPtr ptrToText = Marshal.AllocHGlobal(length + 1);
+            Win32.SendMessage(PluginBase.GetCurrentScintilla(), SciMsg.SCI_GETTEXT, length + 1, ptrToText);
+            string textAnsi = Marshal.PtrToStringAnsi(ptrToText);
+            Marshal.FreeHGlobal(ptrToText);
+            return textAnsi;
         }
-        internal static void PluginCleanUp()
+
+        internal static string GetSelectedText()
         {
-            Win32.WritePrivateProfileString("SomeSection", "SomeKey", someSetting ? "1" : "0", iniFilePath);
+            int length = (int)Win32.SendMessage(PluginBase.GetCurrentScintilla(), SciMsg.SCI_GETLENGTH, 0, 0);
+            IntPtr ptrToText = Marshal.AllocHGlobal(length + 1);
+            Win32.SendMessage(PluginBase.GetCurrentScintilla(), SciMsg.SCI_GETSELTEXT, length + 1, ptrToText);
+            string textAnsi = Marshal.PtrToStringAnsi(ptrToText);
+            Marshal.FreeHGlobal(ptrToText);
+            return textAnsi;
         }
+
+        internal static int GetSelectionStart()
+        {
+            int length = (int)Win32.SendMessage(PluginBase.GetCurrentScintilla(), SciMsg.SCI_GETLENGTH, 0, 0);
+            IntPtr ptrToText = Marshal.AllocHGlobal(length + 1);
+            int selectionStart = (int)Win32.SendMessage(PluginBase.GetCurrentScintilla(), SciMsg.SCI_GETSELECTIONSTART, 0, 0);
+            Marshal.FreeHGlobal(ptrToText);
+            return selectionStart;
+        }
+
+        //internal static void SetToolBarIcon()
+        //{
+        //    toolbarIcons tbIcons = new toolbarIcons();
+        //    tbIcons.hToolbarBmp = tbBmp.GetHbitmap();
+        //    IntPtr pTbIcons = Marshal.AllocHGlobal(Marshal.SizeOf(tbIcons));
+        //    Marshal.StructureToPtr(tbIcons, pTbIcons, false);
+        //    Win32.SendMessage(PluginBase.nppData._nppHandle, NppMsg.NPPM_ADDTOOLBARICON, PluginBase._funcItems.Items[idMyDlg]._cmdID, pTbIcons);
+        //    Marshal.FreeHGlobal(pTbIcons);
+        //}
+
+        //internal static void PluginCleanUp()
+        //{
+        //    Win32.WritePrivateProfileString("SomeSection", "SomeKey", someSetting ? "1" : "0", iniFilePath);
+        //}
+
         #endregion
 
-        #region " Menu functions "
+        #region Menu functions
 
-        internal static void checkBrackets()
+        internal static void checkBracketsSelected()
         {
-            // istanzio lo stack
+            // checking selected text only
+            string allText = GetAllText();
+            string textToCheck = GetSelectedText();
+            int selectionStart = GetSelectionStart();
+
+            // ATTENTION: DO NOT TRIM
+            string textBeforeSelection = allText.Substring(0, selectionStart);
+            string[] rows = textBeforeSelection.Split('\n');
+            int rowcount = rows.Length;
+            int charcount = rows[rows.Length - 1].Length;
+
+            bool isOk = checkBrackets(textToCheck, rowcount, charcount + 1);
+
+            if (isOk)
+            {
+                MessageBox.Show("Selected text in your file have brackets balanced", "Brackets balanced!");
+            }
+        }
+
+        internal static void checkBracketsAll()
+        {
+            // checking entire text in file
+            string textToCheck = GetAllText();
+            bool isOk = checkBrackets(textToCheck);
+
+            if (isOk)
+            {
+                MessageBox.Show("All brackets in your file are balanced", "Brackets balanced!");
+            }
+        }
+
+        internal static bool checkBrackets(string text)
+        {
+            return checkBrackets(text, 1, 1);
+        }
+
+        /// <summary>
+        /// Check brackets balancing in text parameter. rownumber and charnumber are used for better error explaining
+        /// </summary>
+        /// <param name="text">Text to check</param>
+        /// <param name="rownumber"></param>
+        /// <param name="charnumber"></param>
+        /// <returns></returns>
+        internal static bool checkBrackets(string text, int rownumber, int charnumber)
+        {
             Stack stack = new Stack();
 
-            // leggo il testo un carattere alla volta
+            // reading entire text, one character at a time
+            for (int i = 0; i < text.Length; i++, charnumber++)
+            {
+                //TODO: parametrize brackets types
+                char c = text[i];
+                switch (c)
+                {
+                    // if it's open bracket: stack push
+                    case '(':
+                    case '[':
+                    case '{':
+                    case '<':
+                        BCChar bcc = new BCChar();
+                        bcc.charvalue = c;
+                        bcc.rownumber = rownumber;
+                        bcc.charnumber = charnumber;
 
-            // se è una parentesi aperta faccio la push nello stack
+                        stack.Push(bcc);
+                        break;
 
-            // se è una parentesi chiusa faccio la pop e confronto
+                    // if it's a close bracket
+                    case ')':
+                    case ']':
+                    case '}':
+                    case '>':
+                        if (stack.Count > 0)
+                        {
+                            // stack isn't empty: stack pop
+                            BCChar bcc_pop = (BCChar)stack.Pop();
+                            char opened = bcc_pop.charvalue;
 
-            // se sono dello stesso tipo ok, altrimenti errore
+                            // if brackets are not of the same type: error
+                            if ((c == ')' && opened != '(') || (c == ']' && opened != '[') || (c == '}' && opened != '{') || (c == '>' && opened != '<'))
+                            {
+                                string error = string.Format("Brackets unbalanced at row {0} and character {1}", bcc_pop.rownumber, bcc_pop.charnumber);
+                                MessageBox.Show(error, "Brackets unbalanced");
+                                return false;
+                            }
+                        }
+                        else
+                        {
+                            // stack is empty: error
+                            string error = string.Format("Brackets unbalanced at row {0} and character {1}", rownumber, charnumber);
+                            MessageBox.Show(error, "Brackets unbalanced");
+                            return false;
+                        }
+                        break;
 
-            MessageBox.Show("All brackets in your file are balanced", "Brackets balanced!");
+                    case '\n':
+                        rownumber++;
+                        charnumber = 0;
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+
+            if (stack.Count > 0)
+            {
+                // stack isn't empty: error
+                BCChar bcc_pop = (BCChar)stack.Pop();
+                string error = string.Format("Brackets unbalanced at row {0} and character {1}", bcc_pop.rownumber, bcc_pop.charnumber);
+                MessageBox.Show(error, "Brackets unbalanced");
+                return false;
+            }
+
+            return true;
         }
+
+        /* dockable dialog unused
 
         internal static void myDockableDialog()
         {
@@ -111,6 +258,8 @@ namespace BracketsCheck
                 Win32.SendMessage(PluginBase.nppData._nppHandle, NppMsg.NPPM_DMMSHOW, 0, frmMyDlg.Handle);
             }
         }
+        */
+
         #endregion
     }
 }
