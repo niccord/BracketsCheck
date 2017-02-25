@@ -16,7 +16,7 @@ namespace BracketsCheck
         static string iniFilePath = null;
         static bool someSetting = false;
         //static frmMyDlg frmMyDlg = null;
-        static int idMyDlg = -1;
+        //static int idMyDlg = -1;
         static Bitmap tbBmp = Properties.Resources.star;
         static Bitmap tbBmp_tbTab = Properties.Resources.star_bmp;
         //static Icon tbIcon = null;
@@ -50,7 +50,7 @@ namespace BracketsCheck
             PluginBase.SetCommand(0, "Check Brackets: All text", checkBracketsAll, new ShortcutKey(false, false, false, Keys.None));
             PluginBase.SetCommand(1, "Check Brackets: Selected text", checkBracketsSelected, new ShortcutKey(false, false, false, Keys.None));
 
-            idMyDlg = 0;
+            //idMyDlg = 0;
         }
 
         internal static string GetAllText()

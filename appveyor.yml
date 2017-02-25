@@ -1,0 +1,70 @@
+version: 1.0.{build}
+image: Visual Studio 2015
+
+
+platform:
+    - AnyCPU
+    #- x86
+    - x64
+
+configuration:
+    - Debug
+    - Release
+
+install:
+    - call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat"
+
+build:
+    parallel: true                  # enable MSBuild parallel builds
+    verbosity: minimal
+
+build_script:
+    - cd "%APPVEYOR_BUILD_FOLDER%\BracketsCheck"
+    - msbuild BracketsCheck.csproj /m /p:configuration="%configuration%" /p:platform="%platform%"
+
+after_build:
+    - cd "%APPVEYOR_BUILD_FOLDER%\BracketsCheck"
+    - ps: >-
+
+        if ($env:PLATFORM -eq "x64") {
+            Push-AppveyorArtifact "bin\$($env:PLATFORM)\$($env:CONFIGURATION)\BracketsCheck.dll" -FileName BracketsCheck.dll
+        }
+
+        if ($env:PLATFORM -eq "x86" ) {
+            Push-AppveyorArtifact "bin\$($env:PLATFORM)\$($env:CONFIGURATION)\BracketsCheck.dll" -FileName BracketsCheck.dll
+        }
+
+        if ($env:PLATFORM -eq "AnyCPU" ) {
+            Push-AppveyorArtifact "bin\$($env:CONFIGURATION)\BracketsCheck.dll" -FileName BracketsCheck.dll
+        }
+
+        if ($($env:APPVEYOR_REPO_TAG) -eq "true" -and $env:CONFIGURATION -eq "Release") {
+            if($env:PLATFORM -eq "x64"){
+            $ZipFileName = "NppHash_$($env:APPVEYOR_REPO_TAG_NAME)_x64.zip"
+            7z a $ZipFileName bin\$env:PLATFORM\$env:CONFIGURATION\BracketsCheck.dll
+            }
+            if($env:PLATFORM -eq "x86"){
+            $ZipFileName = "NppHash_$($env:APPVEYOR_REPO_TAG_NAME)_x86.zip"
+            7z a $ZipFileName bin\$env:PLATFORM\$env:CONFIGURATION\BracketsCheck.dll
+            }
+            if($env:PLATFORM -eq "AnyCPU"){
+            $ZipFileName = "NppHash_$($env:APPVEYOR_REPO_TAG_NAME)_x86.zip"
+            7z a $ZipFileName bin\$env:CONFIGURATION\BracketsCheck.dll
+            }
+        }
+
+artifacts:
+  - path: BracketsCheck_*.zip
+    name: releases
+
+deploy:
+    provider: GitHub
+    auth_token:
+        secure: !!TODO, see https://www.appveyor.com/docs/deployment/github/#provider-settings!!
+    artifact: releases
+    draft: false
+    prerelease: false
+    force_update: true
+    on:
+        appveyor_repo_tag: true
+        configuration: Release
