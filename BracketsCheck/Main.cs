@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Drawing;
-using System.Drawing.Imaging;
-using System.IO;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Windows.Forms;
 using System.Collections;
 
@@ -13,16 +9,17 @@ namespace BracketsCheck
     {
         #region Fields
         internal const string PluginName = "BracketsCheck";
-        static string iniFilePath = null;
-        static bool someSetting = false;
-        //static frmMyDlg frmMyDlg = null;
-        static int idMyDlg = -1;
-        static Bitmap tbBmp = Properties.Resources.star;
-        static Bitmap tbBmp_tbTab = Properties.Resources.star_bmp;
-        //static Icon tbIcon = null;
+        internal const string IniFilePath = "Config\\BracketsCheck.ini";
         #endregion
 
-        #region 
+        #region Parameters
+        static bool checkRoundBrackets = true;
+        static bool checkSquareBrackets = true;
+        static bool checkCurlyBrackets = true;
+        static bool checkAngleBrackets = true;
+        #endregion
+
+        #region BCChar
 
         private struct BCChar
         {
@@ -37,21 +34,18 @@ namespace BracketsCheck
 
         internal static void CommandMenuInit()
         {
-            StringBuilder sbIniFilePath = new StringBuilder(Win32.MAX_PATH);
-            Win32.SendMessage(PluginBase.nppData._nppHandle, NppMsg.NPPM_GETPLUGINSCONFIGDIR, Win32.MAX_PATH, sbIniFilePath);
-            iniFilePath = sbIniFilePath.ToString();
-            if (!Directory.Exists(iniFilePath)) Directory.CreateDirectory(iniFilePath);
-            iniFilePath = Path.Combine(iniFilePath, PluginName + ".ini");
-            someSetting = (Win32.GetPrivateProfileInt("SomeSection", "SomeKey", 0, iniFilePath) != 0);
-
-            //TODO: tutti i file aperti
-
-            // file aperto
-            PluginBase.SetCommand(0, "Check Brackets: All text", checkBracketsAll, new ShortcutKey(false, false, false, Keys.None));
-            PluginBase.SetCommand(1, "Check Brackets: Selected text", checkBracketsSelected, new ShortcutKey(false, false, false, Keys.None));
-
-            idMyDlg = 0;
+            PluginBase.SetCommand(0, "Check Brackets: All text", checkBracketsAll);
+            PluginBase.SetCommand(1, "Check Brackets: Selected text", checkBracketsSelected);
+            PluginBase.SetCommand(2, "", null);
+            PluginBase.SetCommand(3, "Check round brackets", toggleCheckRoundBrackets, Win32.GetPrivateProfileInt(PluginName, "checkRoundBrackets", 1, IniFilePath) > 0);
+            PluginBase.SetCommand(4, "Check square brackets", toggleCheckSquareBrackets, Win32.GetPrivateProfileInt(PluginName, "checkSquareBrackets", 1, IniFilePath) > 0);
+            PluginBase.SetCommand(5, "Check curly brackets", toggleCheckCurlyBrackets, Win32.GetPrivateProfileInt(PluginName, "checkCurlyBrackets", 1, IniFilePath) > 0);
+            PluginBase.SetCommand(6, "Check angle brackets", toggleCheckAngleBrackets, Win32.GetPrivateProfileInt(PluginName, "checkAngleBrackets", 1, IniFilePath) > 0);
         }
+
+        #endregion
+
+        #region Get Text
 
         internal static string GetAllText()
         {
@@ -82,24 +76,49 @@ namespace BracketsCheck
             return selectionStart;
         }
 
-        //internal static void SetToolBarIcon()
-        //{
-        //    toolbarIcons tbIcons = new toolbarIcons();
-        //    tbIcons.hToolbarBmp = tbBmp.GetHbitmap();
-        //    IntPtr pTbIcons = Marshal.AllocHGlobal(Marshal.SizeOf(tbIcons));
-        //    Marshal.StructureToPtr(tbIcons, pTbIcons, false);
-        //    Win32.SendMessage(PluginBase.nppData._nppHandle, NppMsg.NPPM_ADDTOOLBARICON, PluginBase._funcItems.Items[idMyDlg]._cmdID, pTbIcons);
-        //    Marshal.FreeHGlobal(pTbIcons);
-        //}
+        #endregion
 
-        //internal static void PluginCleanUp()
-        //{
-        //    Win32.WritePrivateProfileString("SomeSection", "SomeKey", someSetting ? "1" : "0", iniFilePath);
-        //}
+        #region Toggle
+
+        internal static void toggleCheckRoundBrackets()
+        {
+            checkRoundBrackets = !checkRoundBrackets;
+            PluginBase.toggleCheckMenuItem(3, checkRoundBrackets);
+        }
+
+        internal static void toggleCheckSquareBrackets()
+        {
+            checkSquareBrackets = !checkSquareBrackets;
+            PluginBase.toggleCheckMenuItem(4, checkSquareBrackets);
+        }
+
+        internal static void toggleCheckCurlyBrackets()
+        {
+            checkCurlyBrackets = !checkCurlyBrackets;
+            PluginBase.toggleCheckMenuItem(5, checkCurlyBrackets);
+        }
+
+        internal static void toggleCheckAngleBrackets()
+        {
+            checkAngleBrackets = !checkAngleBrackets;
+            PluginBase.toggleCheckMenuItem(6, checkAngleBrackets);
+        }
 
         #endregion
 
-        #region Menu functions
+        #region Check Brackets
+
+        internal static void checkBracketsAll()
+        {
+            // checking entire text in file
+            string textToCheck = GetAllText();
+            bool isOk = checkBrackets(textToCheck);
+
+            if (isOk)
+            {
+                MessageBox.Show("All brackets in your file are balanced", "Brackets balanced!");
+            }
+        }
 
         internal static void checkBracketsSelected()
         {
@@ -122,18 +141,6 @@ namespace BracketsCheck
             }
         }
 
-        internal static void checkBracketsAll()
-        {
-            // checking entire text in file
-            string textToCheck = GetAllText();
-            bool isOk = checkBrackets(textToCheck);
-
-            if (isOk)
-            {
-                MessageBox.Show("All brackets in your file are balanced", "Brackets balanced!");
-            }
-        }
-
         internal static bool checkBrackets(string text)
         {
             return checkBrackets(text, 1, 1);
@@ -153,58 +160,50 @@ namespace BracketsCheck
             // reading entire text, one character at a time
             for (int i = 0; i < text.Length; i++, charnumber++)
             {
-                //TODO: parametrize brackets types
                 char c = text[i];
-                switch (c)
+
+                if ((c == '(' && checkRoundBrackets) ||
+                    (c == '[' && checkSquareBrackets) ||
+                    (c == '{' && checkCurlyBrackets) ||
+                    (c == '<' && checkAngleBrackets))
                 {
-                    // if it's open bracket: stack push
-                    case '(':
-                    case '[':
-                    case '{':
-                    case '<':
-                        BCChar bcc = new BCChar();
-                        bcc.charvalue = c;
-                        bcc.rownumber = rownumber;
-                        bcc.charnumber = charnumber;
+                    // it's an open bracket
+                    stackPushBracket(stack, c, rownumber, charnumber);
+                }
+                else if ((c == ')' && checkRoundBrackets) ||
+                    (c == ']' && checkSquareBrackets) ||
+                    (c == '}' && checkCurlyBrackets) ||
+                    (c == '>' && checkAngleBrackets))
+                {
+                    // it's a close bracket
+                    if (stack.Count > 0)
+                    {
+                        // stack isn't empty: stack pop
+                        BCChar bcc_pop = (BCChar)stack.Pop();
+                        char opened = bcc_pop.charvalue;
 
-                        stack.Push(bcc);
-                        break;
-
-                    // if it's a close bracket
-                    case ')':
-                    case ']':
-                    case '}':
-                    case '>':
-                        if (stack.Count > 0)
+                        // if brackets are not of the same type: error
+                        if ((c == ')' && opened != '(') ||
+                            (c == ']' && opened != '[') ||
+                            (c == '}' && opened != '{') ||
+                            (c == '>' && opened != '<'))
                         {
-                            // stack isn't empty: stack pop
-                            BCChar bcc_pop = (BCChar)stack.Pop();
-                            char opened = bcc_pop.charvalue;
-
-                            // if brackets are not of the same type: error
-                            if ((c == ')' && opened != '(') || (c == ']' && opened != '[') || (c == '}' && opened != '{') || (c == '>' && opened != '<'))
-                            {
-                                string error = string.Format("Brackets unbalanced at row {0} and character {1}", bcc_pop.rownumber, bcc_pop.charnumber);
-                                MessageBox.Show(error, "Brackets unbalanced");
-                                return false;
-                            }
-                        }
-                        else
-                        {
-                            // stack is empty: error
-                            string error = string.Format("Brackets unbalanced at row {0} and character {1}", rownumber, charnumber);
-                            MessageBox.Show(error, "Brackets unbalanced");
+                            displayError(bcc_pop.rownumber, bcc_pop.charnumber);
                             return false;
                         }
-                        break;
-
-                    case '\n':
-                        rownumber++;
-                        charnumber = 0;
-                        break;
-
-                    default:
-                        break;
+                    }
+                    else
+                    {
+                        // stack is empty: error
+                        displayError(rownumber, charnumber);
+                        return false;
+                    }
+                }
+                else if (c == '\n')
+                {
+                    // new line
+                    rownumber++;
+                    charnumber = 0;
                 }
             }
 
@@ -212,53 +211,33 @@ namespace BracketsCheck
             {
                 // stack isn't empty: error
                 BCChar bcc_pop = (BCChar)stack.Pop();
-                string error = string.Format("Brackets unbalanced at row {0} and character {1}", bcc_pop.rownumber, bcc_pop.charnumber);
-                MessageBox.Show(error, "Brackets unbalanced");
+                displayError(bcc_pop.rownumber, bcc_pop.charnumber);
                 return false;
             }
 
             return true;
         }
 
-        /* dockable dialog unused
-
-        internal static void myDockableDialog()
+        internal static void stackPushBracket(Stack stack, char c, int rownumber, int charnumber)
         {
-            if (frmMyDlg == null)
-            {
-                frmMyDlg = new frmMyDlg();
+            BCChar bcc = new BCChar();
+            bcc.charvalue = c;
+            bcc.rownumber = rownumber;
+            bcc.charnumber = charnumber;
 
-                using (Bitmap newBmp = new Bitmap(16, 16))
-                {
-                    Graphics g = Graphics.FromImage(newBmp);
-                    ColorMap[] colorMap = new ColorMap[1];
-                    colorMap[0] = new ColorMap();
-                    colorMap[0].OldColor = Color.Fuchsia;
-                    colorMap[0].NewColor = Color.FromKnownColor(KnownColor.ButtonFace);
-                    ImageAttributes attr = new ImageAttributes();
-                    attr.SetRemapTable(colorMap);
-                    g.DrawImage(tbBmp_tbTab, new Rectangle(0, 0, 16, 16), 0, 0, 16, 16, GraphicsUnit.Pixel, attr);
-                    tbIcon = Icon.FromHandle(newBmp.GetHicon());
-                }
-
-                NppTbData _nppTbData = new NppTbData();
-                _nppTbData.hClient = frmMyDlg.Handle;
-                _nppTbData.pszName = "My dockable dialog";
-                _nppTbData.dlgID = idMyDlg;
-                _nppTbData.uMask = NppTbMsg.DWS_DF_CONT_RIGHT | NppTbMsg.DWS_ICONTAB | NppTbMsg.DWS_ICONBAR;
-                _nppTbData.hIconTab = (uint)tbIcon.Handle;
-                _nppTbData.pszModuleName = PluginName;
-                IntPtr _ptrNppTbData = Marshal.AllocHGlobal(Marshal.SizeOf(_nppTbData));
-                Marshal.StructureToPtr(_nppTbData, _ptrNppTbData, false);
-
-                Win32.SendMessage(PluginBase.nppData._nppHandle, NppMsg.NPPM_DMMREGASDCKDLG, 0, _ptrNppTbData);
-            }
-            else
-            {
-                Win32.SendMessage(PluginBase.nppData._nppHandle, NppMsg.NPPM_DMMSHOW, 0, frmMyDlg.Handle);
-            }
+            stack.Push(bcc);
         }
-        */
+
+        internal static void displayError(int rownumber, int charnumber)
+        {
+            string error = string.Format("Brackets unbalanced at row {0} and character {1}", rownumber, charnumber);
+            MessageBox.Show(error, "Brackets unbalanced");
+        }
+
+        internal static void displayMessage(string message)
+        {
+            MessageBox.Show(message);
+        }
 
         #endregion
     }
