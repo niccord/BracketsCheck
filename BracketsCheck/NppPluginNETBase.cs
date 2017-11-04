@@ -39,11 +39,6 @@ namespace BracketsCheck
             _funcItems.Add(funcItem);
         }
 
-        internal static void refreshMenuItems()
-        {
-            _funcItems.RefreshItems();
-        }
-
         internal static IntPtr GetCurrentScintilla()
         {
             int curScintilla;
@@ -54,7 +49,9 @@ namespace BracketsCheck
         internal static void toggleCheckMenuItem(int funcItemID, bool isChecked)
         {
             IntPtr menu = Win32.GetMenu(nppData._nppHandle);
-            Win32.CheckMenuItem(menu, funcItemID, Win32.MF_BYCOMMAND | (isChecked ? Win32.MF_CHECKED : Win32.MF_UNCHECKED));
+            int ret = Win32.CheckMenuItem(menu, _funcItems.Items[funcItemID]._cmdID, Win32.MF_BYCOMMAND | (isChecked ? Win32.MF_CHECKED : Win32.MF_UNCHECKED));
+
+            // Main.displayMessage("menu: " + menu + ", nppHandle: " + nppData._nppHandle + ", ret: " + ret);
 
             FuncItem itemToUpdate = new FuncItem();
             itemToUpdate._cmdID = _funcItems.Items[funcItemID]._cmdID;
@@ -69,7 +66,7 @@ namespace BracketsCheck
         internal static void nppn_ready()
         {
             IntPtr menu = Win32.GetMenu(nppData._nppHandle);
-            if (menu != null)
+            if (menu != IntPtr.Zero)
             {
                 foreach (FuncItem item in _funcItems.Items)
                 {

@@ -36,7 +36,7 @@ namespace BracketsCheck
         {
             PluginBase.SetCommand(0, "Check Brackets: All text", checkBracketsAll);
             PluginBase.SetCommand(1, "Check Brackets: Selected text", checkBracketsSelected);
-            PluginBase.SetCommand(2, "", null);
+            PluginBase.SetCommand(2, "", null); // ----------------------------------
             PluginBase.SetCommand(3, "Check round brackets", toggleCheckRoundBrackets, Win32.GetPrivateProfileInt(PluginName, "checkRoundBrackets", 1, IniFilePath) > 0);
             PluginBase.SetCommand(4, "Check square brackets", toggleCheckSquareBrackets, Win32.GetPrivateProfileInt(PluginName, "checkSquareBrackets", 1, IniFilePath) > 0);
             PluginBase.SetCommand(5, "Check curly brackets", toggleCheckCurlyBrackets, Win32.GetPrivateProfileInt(PluginName, "checkCurlyBrackets", 1, IniFilePath) > 0);
@@ -232,11 +232,6 @@ namespace BracketsCheck
         {
             string error = string.Format("Brackets unbalanced at row {0} and character {1}", rownumber, charnumber);
             MessageBox.Show(error, "Brackets unbalanced");
-        }
-
-        internal static void displayMessage(string message)
-        {
-            MessageBox.Show(message);
         }
 
         #endregion
