@@ -2119,6 +2119,8 @@ namespace BracketsCheck
         [DllImport("kernel32")]
         public static extern int GetPrivateProfileInt(string lpAppName, string lpKeyName, int nDefault, string lpFileName);
         [DllImport("kernel32")]
+        public static extern int GetPrivateProfileString(string lpAppName, string lpKeyName, string lpDefault, StringBuilder retVal, int nSize, string lpFileName);
+        [DllImport("kernel32")]
         public static extern bool WritePrivateProfileString(string lpAppName, string lpKeyName, string lpString, string lpFileName);
 
         public const int MF_BYCOMMAND = 0;

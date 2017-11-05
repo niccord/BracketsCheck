@@ -9,7 +9,6 @@ namespace BracketsCheck
     {
         #region Fields
         internal const string PluginName = "BracketsCheck";
-        internal const string IniFilePath = "Config\\BracketsCheck.ini";
         #endregion
 
         #region Parameters
@@ -34,13 +33,18 @@ namespace BracketsCheck
 
         internal static void CommandMenuInit()
         {
+            PluginBase.InitiINI();
             PluginBase.SetCommand(0, "Check Brackets: All text", checkBracketsAll);
             PluginBase.SetCommand(1, "Check Brackets: Selected text", checkBracketsSelected);
             PluginBase.SetCommand(2, "", null); // ----------------------------------
-            PluginBase.SetCommand(3, "Check round brackets", toggleCheckRoundBrackets, Win32.GetPrivateProfileInt(PluginName, "checkRoundBrackets", 1, IniFilePath) > 0);
-            PluginBase.SetCommand(4, "Check square brackets", toggleCheckSquareBrackets, Win32.GetPrivateProfileInt(PluginName, "checkSquareBrackets", 1, IniFilePath) > 0);
-            PluginBase.SetCommand(5, "Check curly brackets", toggleCheckCurlyBrackets, Win32.GetPrivateProfileInt(PluginName, "checkCurlyBrackets", 1, IniFilePath) > 0);
-            PluginBase.SetCommand(6, "Check angle brackets", toggleCheckAngleBrackets, Win32.GetPrivateProfileInt(PluginName, "checkAngleBrackets", 1, IniFilePath) > 0);
+            string checkRound = "Check round brackets";
+            string checkSquare = "Check square brackets";
+            string checkCurly = "Check curly brackets";
+            string checkAngle = "Check angle brackets";
+            PluginBase.SetCommand(3, checkRound, toggleCheckRoundBrackets, Win32.GetPrivateProfileInt(PluginName, checkRound, 1, PluginBase.IniFilePath) > 0);
+            PluginBase.SetCommand(4, checkSquare, toggleCheckSquareBrackets, Win32.GetPrivateProfileInt(PluginName, checkSquare, 1, PluginBase.IniFilePath) > 0);
+            PluginBase.SetCommand(5, checkCurly, toggleCheckCurlyBrackets, Win32.GetPrivateProfileInt(PluginName, checkCurly, 1, PluginBase.IniFilePath) > 0);
+            PluginBase.SetCommand(6, checkAngle, toggleCheckAngleBrackets, Win32.GetPrivateProfileInt(PluginName, checkAngle, 1, PluginBase.IniFilePath) > 0);
         }
 
         #endregion
@@ -232,6 +236,11 @@ namespace BracketsCheck
         {
             string error = string.Format("Brackets unbalanced at row {0} and character {1}", rownumber, charnumber);
             MessageBox.Show(error, "Brackets unbalanced");
+        }
+
+        internal static void displayMessage(String message)
+        {
+            MessageBox.Show(message);
         }
 
         #endregion
