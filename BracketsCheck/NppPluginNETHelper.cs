@@ -117,6 +117,35 @@ namespace BracketsCheck
             }
         }
 
+        public void UpdateItem(FuncItem itemToUpdate)
+        {
+            IntPtr ptrPosItem = _nativePointer;
+            for (int i = 0; i < _funcItems.Count; i++)
+            {
+                FuncItem updatedItem = new FuncItem();
+                updatedItem._itemName = _funcItems[i]._itemName;
+                ptrPosItem = (IntPtr)((int)ptrPosItem + 128);
+                updatedItem._pFunc = _funcItems[i]._pFunc;
+                ptrPosItem = (IntPtr)((int)ptrPosItem + IntPtr.Size);
+                updatedItem._cmdID = Marshal.ReadInt32(ptrPosItem);
+
+                bool init2check = _funcItems[i]._init2Check;
+
+                if (itemToUpdate._cmdID == updatedItem._cmdID)
+                {
+                    init2check = itemToUpdate._init2Check;
+                }
+
+                ptrPosItem = (IntPtr)((int)ptrPosItem + 4);
+                updatedItem._init2Check = init2check;
+                ptrPosItem = (IntPtr)((int)ptrPosItem + 4);
+                updatedItem._pShKey = _funcItems[i]._pShKey;
+                ptrPosItem = (IntPtr)((int)ptrPosItem + IntPtr.Size);
+
+                _funcItems[i] = updatedItem;
+            }
+        }
+
         public IntPtr NativePointer { get { return _nativePointer; } }
         public List<FuncItem> Items { get { return _funcItems; } }
 
@@ -2089,6 +2118,8 @@ namespace BracketsCheck
         public const int MAX_PATH = 260;
         [DllImport("kernel32")]
         public static extern int GetPrivateProfileInt(string lpAppName, string lpKeyName, int nDefault, string lpFileName);
+        [DllImport("kernel32")]
+        public static extern int GetPrivateProfileString(string lpAppName, string lpKeyName, string lpDefault, StringBuilder retVal, int nSize, string lpFileName);
         [DllImport("kernel32")]
         public static extern bool WritePrivateProfileString(string lpAppName, string lpKeyName, string lpString, string lpFileName);
 
