@@ -41,10 +41,14 @@ namespace BracketsCheck
             string checkSquare = "Check square brackets";
             string checkCurly = "Check curly brackets";
             string checkAngle = "Check angle brackets";
-            PluginBase.SetCommand(3, checkRound, toggleCheckRoundBrackets, Win32.GetPrivateProfileInt(PluginName, checkRound, 1, PluginBase.IniFilePath) > 0);
-            PluginBase.SetCommand(4, checkSquare, toggleCheckSquareBrackets, Win32.GetPrivateProfileInt(PluginName, checkSquare, 1, PluginBase.IniFilePath) > 0);
-            PluginBase.SetCommand(5, checkCurly, toggleCheckCurlyBrackets, Win32.GetPrivateProfileInt(PluginName, checkCurly, 1, PluginBase.IniFilePath) > 0);
-            PluginBase.SetCommand(6, checkAngle, toggleCheckAngleBrackets, Win32.GetPrivateProfileInt(PluginName, checkAngle, 1, PluginBase.IniFilePath) > 0);
+            checkRoundBrackets = Win32.GetPrivateProfileInt(PluginName, checkRound, 1, PluginBase.IniFilePath) > 0;
+            checkSquareBrackets = Win32.GetPrivateProfileInt(PluginName, checkSquare, 1, PluginBase.IniFilePath) > 0;
+            checkCurlyBrackets = Win32.GetPrivateProfileInt(PluginName, checkCurly, 1, PluginBase.IniFilePath) > 0;
+            checkAngleBrackets = Win32.GetPrivateProfileInt(PluginName, checkAngle, 1, PluginBase.IniFilePath) > 0;
+            PluginBase.SetCommand(3, checkRound, toggleCheckRoundBrackets, checkRoundBrackets);
+            PluginBase.SetCommand(4, checkSquare, toggleCheckSquareBrackets, checkSquareBrackets);
+            PluginBase.SetCommand(5, checkCurly, toggleCheckCurlyBrackets, checkCurlyBrackets);
+            PluginBase.SetCommand(6, checkAngle, toggleCheckAngleBrackets, checkAngleBrackets);
         }
 
         #endregion
