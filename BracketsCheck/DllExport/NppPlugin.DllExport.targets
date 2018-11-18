@@ -17,8 +17,8 @@
                    ProjectDirectory="$(MSBuildProjectDirectory)"
                    InputFileName="$(TargetPath)"
                    FrameworkPath="$(TargetedFrameworkDir);$(TargetFrameworkDirectory)"
-                   LibToolPath="C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.11.25503\bin\Hostx64\x64"
+                   LibToolPath="$(DevEnvDir)\..\..\VC\bin"
                    LibToolDllPath="$(DevEnvDir)"
-                   SdkPath="C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.6 Tools"/>
+                   SdkPath="$(SDK40ToolsPath)"/>
   </Target>
 </Project>
