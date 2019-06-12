@@ -1,5 +1,5 @@
-version: 1.0.{build}
-image: Visual Studio 2015
+version: 1.2.3.{build}
+image: Visual Studio 2022
 
 
 platform:
@@ -8,48 +8,54 @@ platform:
     - x64
 
 configuration:
-    - Debug
     - Release
+    - Debug
 
 install:
-    - call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat"
+    - if "%platform%"=="x64" set archi=amd64
+    - if "%platform%"=="x64" set platform_input=x64
 
-build:
-    parallel: true                  # enable MSBuild parallel builds
-    verbosity: minimal
+    - if "%platform%"=="x86" set archi=x86
+    - if "%platform%"=="x86" set platform_input=x86
+
+    - if "%platform%"=="AnyCPU" set archi=x86
+    - if "%platform%"=="AnyCPU" set platform_input=AnyCPU
+
+
+    - call "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvarsall.bat" %archi%
 
 build_script:
     - cd "%APPVEYOR_BUILD_FOLDER%\BracketsCheck"
-    - msbuild BracketsCheck.csproj /m /p:configuration="%configuration%" /p:platform="%platform%"
+    - msbuild BracketsCheck.csproj /m /p:configuration="%configuration%" /p:platform="%platform_input%"
 
 after_build:
-    - cd "%APPVEYOR_BUILD_FOLDER%\BracketsCheck"
+    - cd "%APPVEYOR_BUILD_FOLDER%"
     - ps: >-
 
-        if ($env:PLATFORM -eq "x64") {
-            Push-AppveyorArtifact "bin\$($env:PLATFORM)\$($env:CONFIGURATION)\BracketsCheck.dll" -FileName BracketsCheck.dll
+        if ($env:PLATFORM_INPUT -eq "x64") {
+            Push-AppveyorArtifact "BracketsCheck\bin\$($env:PLATFORM_INPUT)\$($env:CONFIGURATION)\BracketsCheck.dll" -FileName BracketsCheck.dll
         }
 
-        if ($env:PLATFORM -eq "x86" ) {
-            Push-AppveyorArtifact "bin\$($env:PLATFORM)\$($env:CONFIGURATION)\BracketsCheck.dll" -FileName BracketsCheck.dll
+        if ($env:PLATFORM_INPUT -eq "x86" ) {
+            Push-AppveyorArtifact "BracketsCheck\bin\$($env:PLATFORM_INPUT)\$($env:CONFIGURATION)\BracketsCheck.dll" -FileName BracketsCheck.dll
         }
 
-        if ($env:PLATFORM -eq "AnyCPU" ) {
-            Push-AppveyorArtifact "bin\$($env:CONFIGURATION)\BracketsCheck.dll" -FileName BracketsCheck.dll
+        if ($env:PLATFORM_INPUT -eq "AnyCPU" ) {
+            Push-AppveyorArtifact "BracketsCheck\bin\$($env:CONFIGURATION)\BracketsCheck.dll" -FileName BracketsCheck.dll
         }
 
         if ($($env:APPVEYOR_REPO_TAG) -eq "true" -and $env:CONFIGURATION -eq "Release") {
-            if($env:PLATFORM -eq "x64"){
-            $ZipFileName = "NppHash_$($env:APPVEYOR_REPO_TAG_NAME)_x64.zip"
-            7z a $ZipFileName bin\$env:PLATFORM\$env:CONFIGURATION\BracketsCheck.dll
+            if($env:PLATFORM_INPUT -eq "x64"){
+                $ZipFileName = "BracketsCheck_$($env:APPVEYOR_REPO_TAG_NAME)_x64.zip"
+                7z a $ZipFileName "$($env:APPVEYOR_BUILD_FOLDER)\BracketsCheck\bin\$env:PLATFORM_INPUT\$env:CONFIGURATION\BracketsCheck.dll"
             }
-            if($env:PLATFORM -eq "x86"){
-            $ZipFileName = "NppHash_$($env:APPVEYOR_REPO_TAG_NAME)_x86.zip"
-            7z a $ZipFileName bin\$env:PLATFORM\$env:CONFIGURATION\BracketsCheck.dll
+            if($env:PLATFORM_INPUT -eq "x86"){
+                $ZipFileName = "BracketsCheck_$($env:APPVEYOR_REPO_TAG_NAME)_x86.zip"
+                7z a $ZipFileName "$($env:APPVEYOR_BUILD_FOLDER)\BracketsCheck\bin\$env:PLATFORM_INPUT\$env:CONFIGURATION\BracketsCheck.dll"
             }
-            if($env:PLATFORM -eq "AnyCPU"){
-            $ZipFileName = "NppHash_$($env:APPVEYOR_REPO_TAG_NAME)_x86.zip"
-            7z a $ZipFileName bin\$env:CONFIGURATION\BracketsCheck.dll
+            if($env:PLATFORM_INPUT -eq "AnyCPU"){
+                $ZipFileName = "BracketsCheck_$($env:APPVEYOR_REPO_TAG_NAME)_x86.zip"
+                7z a $ZipFileName "$($env:APPVEYOR_BUILD_FOLDER)\BracketsCheck\bin\$env:CONFIGURATION\BracketsCheck.dll"
             }
         }
 
