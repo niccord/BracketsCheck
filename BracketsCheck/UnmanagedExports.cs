@@ -44,20 +44,20 @@ namespace BracketsCheck
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         static void beNotified(IntPtr notifyCode)
         {
-            SCNotification nc = (SCNotification)Marshal.PtrToStructure(notifyCode, typeof(SCNotification));
-            if (nc.nmhdr.code == (uint)NppMsg.NPPN_TBMODIFICATION)
+            ScNotification notification = (ScNotification)Marshal.PtrToStructure(notifyCode, typeof(ScNotification));
+            if (notification.Header.Code == (uint)NppMsg.NPPN_TBMODIFICATION)
             {
                 PluginBase._funcItems.RefreshItems();
-                //Main.SetToolBarIcon();
+                // Main.SetToolBarIcon();
             }
-            else if (nc.nmhdr.code == (uint)NppMsg.NPPN_SHUTDOWN)
+            else if (notification.Header.Code == (uint)NppMsg.NPPN_SHUTDOWN)
             {
-                //Main.PluginCleanUp();
-                //Marshal.FreeHGlobal(_ptrPluginName);
+                Main.PluginCleanUp();
+                Marshal.FreeHGlobal(_ptrPluginName);
             }
-            else if (nc.nmhdr.code == (uint)NppMsg.NPPN_READY)
+            else
             {
-                PluginBase.nppn_ready();
+                // Main.OnNotification(notification);
             }
         }
     }

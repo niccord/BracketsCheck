@@ -9,6 +9,7 @@ namespace BracketsCheck
     {
         #region Fields
         internal const string PluginName = "BracketsCheck";
+        static string sectionName = "WhichBracketTypeMustBeChecked";
         #endregion
 
         #region Parameters
@@ -31,24 +32,33 @@ namespace BracketsCheck
 
         #region StartUp/CleanUp
 
-        internal static void CommandMenuInit()
+        static internal void CommandMenuInit()
         {
             PluginBase.InitiINI();
             PluginBase.SetCommand(0, "Check Brackets: All text", checkBracketsAll);
             PluginBase.SetCommand(1, "Check Brackets: Selected text", checkBracketsSelected);
-            PluginBase.SetCommand(2, "", null); // ----------------------------------
+            PluginBase.SetCommand(2, "---", null); // ----------------------------------
             string checkRound = "Check round brackets";
             string checkSquare = "Check square brackets";
             string checkCurly = "Check curly brackets";
             string checkAngle = "Check angle brackets";
-            checkRoundBrackets = Win32.GetPrivateProfileInt(PluginName, checkRound, 1, PluginBase.IniFilePath) > 0;
-            checkSquareBrackets = Win32.GetPrivateProfileInt(PluginName, checkSquare, 1, PluginBase.IniFilePath) > 0;
-            checkCurlyBrackets = Win32.GetPrivateProfileInt(PluginName, checkCurly, 1, PluginBase.IniFilePath) > 0;
-            checkAngleBrackets = Win32.GetPrivateProfileInt(PluginName, checkAngle, 1, PluginBase.IniFilePath) > 0;
+
+            checkRoundBrackets = Win32.GetPrivateProfileInt(sectionName, "checkRound", 1, PluginBase.IniFilePath) > 0;
+            checkSquareBrackets = Win32.GetPrivateProfileInt(sectionName, "checkSquare", 1, PluginBase.IniFilePath) > 0;
+            checkCurlyBrackets = Win32.GetPrivateProfileInt(sectionName, "checkCurly", 1, PluginBase.IniFilePath) > 0;
+            checkAngleBrackets = Win32.GetPrivateProfileInt(sectionName, "checkAngle", 1, PluginBase.IniFilePath) > 0;
             PluginBase.SetCommand(3, checkRound, toggleCheckRoundBrackets, checkRoundBrackets);
             PluginBase.SetCommand(4, checkSquare, toggleCheckSquareBrackets, checkSquareBrackets);
             PluginBase.SetCommand(5, checkCurly, toggleCheckCurlyBrackets, checkCurlyBrackets);
             PluginBase.SetCommand(6, checkAngle, toggleCheckAngleBrackets, checkAngleBrackets);
+        }
+
+        static internal void PluginCleanUp()
+        {
+            Win32.WritePrivateProfileString(sectionName, "checkRound", checkRoundBrackets ? "1" : "0", PluginBase.IniFilePath);
+            Win32.WritePrivateProfileString(sectionName, "checkSquare", checkSquareBrackets ? "1" : "0", PluginBase.IniFilePath);
+            Win32.WritePrivateProfileString(sectionName, "checkCurly", checkCurlyBrackets ? "1" : "0", PluginBase.IniFilePath);
+            Win32.WritePrivateProfileString(sectionName, "checkAngle", checkAngleBrackets ? "1" : "0", PluginBase.IniFilePath);
         }
 
         #endregion
@@ -88,25 +98,25 @@ namespace BracketsCheck
 
         #region Toggle
 
-        internal static void toggleCheckRoundBrackets()
+        static void toggleCheckRoundBrackets()
         {
             checkRoundBrackets = !checkRoundBrackets;
             PluginBase.toggleCheckMenuItem(3, checkRoundBrackets);
         }
 
-        internal static void toggleCheckSquareBrackets()
+        static void toggleCheckSquareBrackets()
         {
             checkSquareBrackets = !checkSquareBrackets;
             PluginBase.toggleCheckMenuItem(4, checkSquareBrackets);
         }
 
-        internal static void toggleCheckCurlyBrackets()
+        static void toggleCheckCurlyBrackets()
         {
             checkCurlyBrackets = !checkCurlyBrackets;
             PluginBase.toggleCheckMenuItem(5, checkCurlyBrackets);
         }
 
-        internal static void toggleCheckAngleBrackets()
+        static void toggleCheckAngleBrackets()
         {
             checkAngleBrackets = !checkAngleBrackets;
             PluginBase.toggleCheckMenuItem(6, checkAngleBrackets);

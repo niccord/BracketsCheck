@@ -69,18 +69,7 @@ namespace BracketsCheck
         internal static void toggleCheckMenuItem(int funcItemID, bool isChecked)
         {
             IntPtr menu = Win32.GetMenu(nppData._nppHandle);
-            Win32.CheckMenuItem(menu, _funcItems.Items[funcItemID]._cmdID, Win32.MF_BYCOMMAND | (isChecked ? Win32.MF_CHECKED : Win32.MF_UNCHECKED));
-
-            FuncItem itemToUpdate = new FuncItem();
-            itemToUpdate._cmdID = _funcItems.Items[funcItemID]._cmdID;
-            itemToUpdate._init2Check = isChecked;
-            itemToUpdate._itemName = _funcItems.Items[funcItemID]._itemName;
-            itemToUpdate._pFunc = _funcItems.Items[funcItemID]._pFunc;
-            itemToUpdate._pShKey = _funcItems.Items[funcItemID]._pShKey;
-
-            _funcItems.UpdateItem(itemToUpdate);
-
-            savePluginParams();
+            int i = Win32.CheckMenuItem(menu, _funcItems.Items[funcItemID]._cmdID, Win32.MF_BYCOMMAND | (isChecked ? Win32.MF_CHECKED : Win32.MF_UNCHECKED));
         }
 
         internal static void nppn_ready()
