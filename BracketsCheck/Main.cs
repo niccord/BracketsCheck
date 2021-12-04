@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using System.Collections;
@@ -175,10 +175,12 @@ namespace BracketsCheck
         {
             Stack stack = new Stack();
 
+            char c;
+
             // reading entire text, one character at a time
-            for (int i = 0; i < text.Length; i++, charnumber++)
+            for (int i = 0; i < text.Length; i++, charnumber += c == '\t' ? 4 : 1)
             {
-                char c = text[i];
+                c = text[i];
 
                 if ((c == '(' && checkRoundBrackets) ||
                     (c == '[' && checkSquareBrackets) ||
