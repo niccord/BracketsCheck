@@ -1,0 +1,54 @@
+name: CI_build
+
+on: [push, pull_request]
+
+jobs:
+  build:
+
+    runs-on: windows-latest
+    strategy:
+      max-parallel: 6
+      matrix:
+        build_configuration: [Release, Debug]
+        build_platform: [x64, Any CPU]
+        
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v3
+
+    - name: Add msbuild to PATH
+      uses: microsoft/setup-msbuild@v1
+
+    - name: MSBuild of plugin dll
+      working-directory: .
+      run: msbuild BracketsCheck.sln /m /p:configuration="${{ matrix.build_configuration }}" /p:platform="${{ matrix.build_platform }}"
+
+    - name: Archive artifacts for ${{ matrix.build_platform }}
+      if: matrix.build_platform == 'x64' && matrix.build_configuration == 'Release'
+      uses: actions/upload-artifact@v3
+      with:
+          name: BracketsCheck-${{ steps.tagName.outputs.tag }}-x64
+          path: BracketsCheck\bin\${{ matrix.build_platform }}\${{ matrix.build_configuration }}\BracketsCheck.dll
+
+    - name: Archive artifacts for ${{ matrix.build_platform }}
+      if: matrix.build_platform == 'Any CPU' && matrix.build_configuration == 'Release'
+      uses: actions/upload-artifact@v3
+      with:
+          name: BracketsCheck-${{ steps.tagName.outputs.tag }}-x86
+          path: BracketsCheck\bin\${{ matrix.build_configuration }}\BracketsCheck.dll
+
+    - uses: olegtarasov/get-tag@v2.1.2
+      id: tagName
+
+    - name: Release for ${{ matrix.build_platform }}
+      uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/tags/') && matrix.build_platform == 'x64'
+      with:
+          files: BracketsCheck-${{ steps.tagName.outputs.tag }}-x64
+
+    - name: Release for ${{ matrix.build_platform }}
+      uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/tags/') && matrix.build_platform == 'Any CPU'
+      with:
+          files: BracketsCheck-${{ steps.tagName.outputs.tag }}-x86
+
